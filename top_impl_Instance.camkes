@@ -16,62 +16,59 @@ import "components/VM_consumer_p_impl_dst_process/VM_consumer_p_impl_dst_process
 assembly {
   composition {
     component VM_emitter_p_impl_src_process vmsrc_process;
-    component FileServer fserv; // expansion of instance in macro VM_GENERAL_COMPOSITION_DEF. See https://github.com/seL4/camkes-vm/blob/39734d70d38af597e459f4923c75db95508d9661/components/VM_Arm/configurations/vm.h#L91
+    component FileServer fserv; // expansion of macro VM_GENERAL_COMPOSITION_DEF. See https://github.com/seL4/camkes-vm/blob/39734d70d38af597e459f4923c75db95508d9661/components/VM_Arm/configurations/vm.h#L91
+
+    // expansion of macro VM_VIRTUAL_SERIAL_COMPONENTS_DEF. See https://github.com/seL4/camkes-vm/blob/39734d70d38af597e459f4923c75db95508d9661/components/VM_Arm/configurations/vm.h#L116
+    component TimeServer time_server;
+    component SerialServer serial;
+
     component VM_consumer_p_impl_dst_process vmdst_process;
     component Pacer pacer;
 
-    component SerialServer serial;
-    component TimeServer time_server;
-    connection seL4TimeServer serialserver_timer(from serial.timeout, to time_server.the_timer);
-
-    connection seL4SerialServer serial_vm1(from vmsrc_process.batch, to serial.processed_batch); \
-    connection seL4SerialServer serial_input_vm1(from vmsrc_process.serial_getchar, to serial.getchar);
-
-    connection seL4SerialServer serial_vm2(from vmdst_process.batch, to serial.processed_batch); \
-    connection seL4SerialServer serial_input_vm2(from vmdst_process.serial_getchar, to serial.getchar);
-
-
-    // Expansion of connections in macro VM_COMPONENT_CONNECTIONS_DEF. See https://github.com/seL4/camkes-vm/blob/39734d70d38af597e459f4923c75db95508d9661/components/VM_Arm/configurations/vm.h#L87
+    // expansion of macro VM_COMPONENT_CONNECTIONS_DEF. See https://github.com/seL4/camkes-vm/blob/39734d70d38af597e459f4923c75db95508d9661/components/VM_Arm/configurations/vm.h#L87
     connection seL4RPCDataport conn1(from vmsrc_process.fs, to fserv.fs_ctrl);
     connection seL4GlobalAsynch conn2(from vmsrc_process.notification_ready_connector, to vmsrc_process.notification_ready);
 
     connection seL4VMDTBPassthrough conn3(from vmsrc_process.dtb_self, to vmsrc_process.dtb);
-    // Expansion of connections in macro VM_COMPONENT_CONNECTIONS_DEF. See https://github.com/seL4/camkes-vm/blob/39734d70d38af597e459f4923c75db95508d9661/components/VM_Arm/configurations/vm.h#L87
-    connection seL4RPCDataport conn4(from vmdst_process.fs, to fserv.fs_ctrl);
-    connection seL4GlobalAsynch conn5(from vmdst_process.notification_ready_connector, to vmdst_process.notification_ready);
 
-    connection seL4VMDTBPassthrough conn6(from vmdst_process.dtb_self, to vmdst_process.dtb);
-    connection seL4SharedDataWithCaps conn7(from vmsrc_process.sb_write_port, to vmdst_process.sb_read_port);
-    connection seL4Notification conn8(from pacer.tick, to pacer.tock);
-    connection seL4GlobalAsynch conn9(from pacer.period_to_vmsrc_process_notification, to vmsrc_process.sb_pacer_period_notification);
-    connection seL4SharedDataWithCaps conn10(from pacer.period_to_vmsrc_process_queue, to vmsrc_process.sb_pacer_period_queue);
-    connection seL4GlobalAsynch conn11(from pacer.period_to_vmdst_process_notification, to vmdst_process.sb_pacer_period_notification);
-    connection seL4SharedDataWithCaps conn12(from pacer.period_to_vmdst_process_queue, to vmdst_process.sb_pacer_period_queue);
+    // expansion of macro VM_VIRTUAL_SERIAL_COMPONENTS_DEF. See https://github.com/seL4/camkes-vm/blob/39734d70d38af597e459f4923c75db95508d9661/components/VM_Arm/configurations/vm.h#L119
+    connection seL4TimeServer conn4(from serial.timeout, to time_server.the_timer);
+
+    // expansion of macro PER_VM_VIRTUAL_SERIAL_CONNECTIONS_DEF. See https://github.com/seL4/camkes-vm/blob/39734d70d38af597e459f4923c75db95508d9661/components/VM_Arm/configurations/vm.h#L121
+    connection seL4SerialServer conn5(from vmsrc_process.batch, to serial.processed_batch);
+    connection seL4SerialServer conn6(from vmsrc_process.serial_getchar, to serial.getchar);
+
+    // expansion of macro VM_COMPONENT_CONNECTIONS_DEF. See https://github.com/seL4/camkes-vm/blob/39734d70d38af597e459f4923c75db95508d9661/components/VM_Arm/configurations/vm.h#L87
+    connection seL4RPCDataport conn7(from vmdst_process.fs, to fserv.fs_ctrl);
+    connection seL4GlobalAsynch conn8(from vmdst_process.notification_ready_connector, to vmdst_process.notification_ready);
+
+    connection seL4VMDTBPassthrough conn9(from vmdst_process.dtb_self, to vmdst_process.dtb);
+    // expansion of macro PER_VM_VIRTUAL_SERIAL_CONNECTIONS_DEF. See https://github.com/seL4/camkes-vm/blob/39734d70d38af597e459f4923c75db95508d9661/components/VM_Arm/configurations/vm.h#L121
+    connection seL4SerialServer conn10(from vmdst_process.batch, to serial.processed_batch);
+    connection seL4SerialServer conn11(from vmdst_process.serial_getchar, to serial.getchar);
+
+    connection seL4SharedDataWithCaps conn12(from vmsrc_process.sb_write_port, to vmdst_process.sb_read_port);
+    connection seL4Notification conn13(from pacer.tick, to pacer.tock);
+    connection seL4GlobalAsynch conn14(from pacer.period_to_vmsrc_process_notification, to vmsrc_process.sb_pacer_period_notification);
+    connection seL4SharedDataWithCaps conn15(from pacer.period_to_vmsrc_process_queue, to vmsrc_process.sb_pacer_period_queue);
+    connection seL4GlobalAsynch conn16(from pacer.period_to_vmdst_process_notification, to vmdst_process.sb_pacer_period_notification);
+    connection seL4SharedDataWithCaps conn17(from pacer.period_to_vmdst_process_queue, to vmdst_process.sb_pacer_period_queue);
   }
 
   configuration {
-        time_server.timers_per_client = 1;
-        time_server.priority = 255;
-        time_server.simple = true;
 
-    vmsrc_process.serial_getchar_shmem_size = 0x1000;
-    vmsrc_process.batch_shmem_size = 0x1000;
-
-    vmdst_process.serial_getchar_shmem_size = 0x1000;
-    vmdst_process.batch_shmem_size = 0x1000;
+    // expansion of macro VM_VIRTUAL_SERIAL_GENERAL_CONFIGURATION_DEF. See https://github.com/seL4/camkes-vm/blob/39734d70d38af597e459f4923c75db95508d9661/components/VM_Arm/configurations/vm.h#L129
+    time_server.timers_per_client = 1;
+    time_server.priority = 255;
+    time_server.simple = true;
 
     vmsrc_process.num_extra_frame_caps = 0;
     vmsrc_process.extra_frame_map_address = 0;
+    vmsrc_process.cnode_size_bits = 23;
+    vmsrc_process.simple_untyped24_pool = 12;
+    fserv.heap_size = 165536; // expansion of macro VM_GENERAL_CONFIGURATION_DEF. See https://github.com/seL4/camkes-vm/blob/39734d70d38af597e459f4923c75db95508d9661/components/VM_Arm/configurations/vm.h#L98
 
-    //vmsrc_process.cnode_size_bits = 23;
-    //vmsrc_process.simple_untyped24_pool = 12;
-    vmsrc_process.cnode_size_bits = 18;
-    vmsrc_process.simple_untyped21_pool = 12;
-    vmsrc_process.simple_untyped12_pool = 12;
-
-    // Expansion of configuration entries in macro VM_GENERAL_CONFIGURATION_DEF. See https://github.com/seL4/camkes-vm/blob/39734d70d38af597e459f4923c75db95508d9661/components/VM_Arm/configurations/vm.h#L98
-    fserv.heap_size = 165536;
-    // Expansion of configuration entries in macro VM_CONFIGURATION_DEF. See https://github.com/seL4/camkes-vm/blob/39734d70d38af597e459f4923c75db95508d9661/components/VM_Arm/configurations/vm.h#L101
+    // expansion of macro VM_CONFIGURATION_DEF. See https://github.com/seL4/camkes-vm/blob/39734d70d38af597e459f4923c75db95508d9661/components/VM_Arm/configurations/vm.h#L101
     vmsrc_process.fs_shmem_size = 0x100000;
     vmsrc_process.global_endpoint_base = 1 << 27;
     vmsrc_process.asid_pool = true;
@@ -81,17 +78,18 @@ assembly {
     vmsrc_process.sem_value = 0;
     vmsrc_process.heap_size = 0x300000;
 
+
+    // expansion of macro PER_VM_VIRTUAL_SERIAL_CONFIGURATION_DEF. See https://github.com/seL4/camkes-vm/blob/39734d70d38af597e459f4923c75db95508d9661/components/VM_Arm/configurations/vm.h#L121
+    vmsrc_process.serial_getchar_shmem_size = 0x1000;
+    vmsrc_process.batch_shmem_size = 0x1000;
+
     vmsrc_process._domain = 2;
     vmdst_process.num_extra_frame_caps = 0;
     vmdst_process.extra_frame_map_address = 0;
+    vmdst_process.cnode_size_bits = 23;
+    vmdst_process.simple_untyped24_pool = 12;
 
-    //vmdst_process.cnode_size_bits = 23;
-    //vmdst_process.simple_untyped24_pool = 12;
-    vmdst_process.cnode_size_bits = 18;
-    vmdst_process.simple_untyped21_pool = 12;
-    vmdst_process.simple_untyped12_pool = 12;
-
-    // Expansion of configuration entries in macro VM_CONFIGURATION_DEF. See https://github.com/seL4/camkes-vm/blob/39734d70d38af597e459f4923c75db95508d9661/components/VM_Arm/configurations/vm.h#L101
+    // expansion of macro VM_CONFIGURATION_DEF. See https://github.com/seL4/camkes-vm/blob/39734d70d38af597e459f4923c75db95508d9661/components/VM_Arm/configurations/vm.h#L101
     vmdst_process.fs_shmem_size = 0x100000;
     vmdst_process.global_endpoint_base = 1 << 27;
     vmdst_process.asid_pool = true;
@@ -100,6 +98,11 @@ assembly {
     vmdst_process._priority = 101;
     vmdst_process.sem_value = 0;
     vmdst_process.heap_size = 0x300000;
+
+
+    // expansion of macro PER_VM_VIRTUAL_SERIAL_CONFIGURATION_DEF. See https://github.com/seL4/camkes-vm/blob/39734d70d38af597e459f4923c75db95508d9661/components/VM_Arm/configurations/vm.h#L121
+    vmdst_process.serial_getchar_shmem_size = 0x1000;
+    vmdst_process.batch_shmem_size = 0x1000;
 
     vmdst_process._domain = 3;
     vmsrc_process.sb_write_port_access = "RW";

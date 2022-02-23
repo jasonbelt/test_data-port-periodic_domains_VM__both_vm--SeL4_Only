@@ -149,10 +149,12 @@
 (declare-datatypes ((CAmkESComponent 0)) ((
   (vmsrc_process)
   (fserv)
+  (time_server)
+  (serial)
   (vmdst_process)
   (pacer))))
 (declare-const CAmkESComponent_count Int)
-(assert (= 4 CAmkESComponent_count))
+(assert (= 6 CAmkESComponent_count))
 
 (define-fun isPeriodicDispatcher ((_component CAmkESComponent)) Bool
   (and (= ModelSchedulingType PeriodicDispatching)
@@ -168,11 +170,11 @@
 
 (define-fun isTimeServer ((_component CAmkESComponent)) Bool
   (and ; TODO: list scenarios where a time server is expected
-       false))
+       (= _component time_server)))
 
 (define-fun isSerialServer ((_component CAmkESComponent)) Bool
   (and ; TODO: list scenarios where a serial server is expected
-       false))
+       (= _component serial)))
 
 (declare-datatypes ((CAmkESPort 0)) ((
   (vmsrc_process_sb_write_port)
@@ -190,6 +192,10 @@
   (vmsrc_process_sb_pacer_period_notification)
   (vmsrc_process_dtb)
   (fserv_fs_ctrl)
+  (time_server_the_timer)
+  (serial_getchar)
+  (serial_processed_batch)
+  (serial_timeout)
   (vmdst_process_sb_read_port)
   (vmdst_process_sb_pacer_period_queue)
   (vmdst_process_notification_ready_connector)
@@ -211,7 +217,7 @@
   (pacer_tick)
   (pacer_tock))))
 (declare-const CAmkESPort_count Int)
-(assert (= 35 CAmkESPort_count))
+(assert (= 39 CAmkESPort_count))
 
 (declare-const CAmkESAccessRestrictions (Array CAmkESPort AccessType))
   (assert (= RW (select CAmkESAccessRestrictions vmsrc_process_sb_write_port)))
@@ -235,9 +241,14 @@
   (conn9)
   (conn10)
   (conn11)
-  (conn12))))
+  (conn12)
+  (conn13)
+  (conn14)
+  (conn15)
+  (conn16)
+  (conn17))))
 (declare-const CAmkESConnection_count Int)
-(assert (= 12 CAmkESConnection_count))
+(assert (= 17 CAmkESConnection_count))
 
 (define-fun isSelfPacingConnection ((_conn CAmkESConnection)) Bool
   (and (= ModelSchedulingType SelfPacing)
@@ -246,11 +257,11 @@
 
 (define-fun isPacingConnection ((_conn CAmkESConnection)) Bool
   (and (= ModelSchedulingType Pacing)
-       (or (= _conn conn8)
-           (= _conn conn9)
-           (= _conn conn10)
-           (= _conn conn11)
-           (= _conn conn12)
+       (or (= _conn conn13)
+           (= _conn conn14)
+           (= _conn conn15)
+           (= _conn conn16)
+           (= _conn conn17)
            false)))
 
 (define-fun isPeriodicDispatchingConnection ((_conn CAmkESConnection)) Bool
@@ -268,23 +279,33 @@
       (= _conn conn4)
       (= _conn conn5)
       (= _conn conn6)
+      (= _conn conn7)
+      (= _conn conn8)
+      (= _conn conn9)
+      (= _conn conn10)
+      (= _conn conn11)
       false))
 
 (declare-const CAmkESConnectionType (Array CAmkESConnection seL4ConnectorType))
   (assert (= seL4RPCDataport (select CAmkESConnectionType conn1)))
   (assert (= seL4GlobalAsynch (select CAmkESConnectionType conn2)))
   (assert (= seL4VMDTBPassthrough (select CAmkESConnectionType conn3)))
-  (assert (= seL4RPCDataport (select CAmkESConnectionType conn4)))
-  (assert (= seL4GlobalAsynch (select CAmkESConnectionType conn5)))
-  (assert (= seL4VMDTBPassthrough (select CAmkESConnectionType conn6)))
-  (assert (= seL4SharedDataWithCaps (select CAmkESConnectionType conn7)))
-  (assert (= seL4Notification (select CAmkESConnectionType conn8)))
-  (assert (= seL4GlobalAsynch (select CAmkESConnectionType conn9)))
-  (assert (= seL4SharedDataWithCaps (select CAmkESConnectionType conn10)))
-  (assert (= seL4GlobalAsynch (select CAmkESConnectionType conn11)))
+  (assert (= seL4TimeServer (select CAmkESConnectionType conn4)))
+  (assert (= seL4SerialServer (select CAmkESConnectionType conn5)))
+  (assert (= seL4SerialServer (select CAmkESConnectionType conn6)))
+  (assert (= seL4RPCDataport (select CAmkESConnectionType conn7)))
+  (assert (= seL4GlobalAsynch (select CAmkESConnectionType conn8)))
+  (assert (= seL4VMDTBPassthrough (select CAmkESConnectionType conn9)))
+  (assert (= seL4SerialServer (select CAmkESConnectionType conn10)))
+  (assert (= seL4SerialServer (select CAmkESConnectionType conn11)))
   (assert (= seL4SharedDataWithCaps (select CAmkESConnectionType conn12)))
+  (assert (= seL4Notification (select CAmkESConnectionType conn13)))
+  (assert (= seL4GlobalAsynch (select CAmkESConnectionType conn14)))
+  (assert (= seL4SharedDataWithCaps (select CAmkESConnectionType conn15)))
+  (assert (= seL4GlobalAsynch (select CAmkESConnectionType conn16)))
+  (assert (= seL4SharedDataWithCaps (select CAmkESConnectionType conn17)))
 (declare-const CAmkESConnectionType_count Int)
-(assert (= 12 CAmkESConnectionType_count))
+(assert (= 17 CAmkESConnectionType_count))
 
 (declare-const CAmkESPortComponent (Array CAmkESPort CAmkESComponent))
   (assert (= vmsrc_process (select CAmkESPortComponent vmsrc_process_sb_write_port)))
@@ -302,6 +323,10 @@
   (assert (= vmsrc_process (select CAmkESPortComponent vmsrc_process_sb_pacer_period_notification)))
   (assert (= vmsrc_process (select CAmkESPortComponent vmsrc_process_dtb)))
   (assert (= fserv (select CAmkESPortComponent fserv_fs_ctrl)))
+  (assert (= time_server (select CAmkESPortComponent time_server_the_timer)))
+  (assert (= serial (select CAmkESPortComponent serial_getchar)))
+  (assert (= serial (select CAmkESPortComponent serial_processed_batch)))
+  (assert (= serial (select CAmkESPortComponent serial_timeout)))
   (assert (= vmdst_process (select CAmkESPortComponent vmdst_process_sb_read_port)))
   (assert (= vmdst_process (select CAmkESPortComponent vmdst_process_sb_pacer_period_queue)))
   (assert (= vmdst_process (select CAmkESPortComponent vmdst_process_notification_ready_connector)))
@@ -323,25 +348,30 @@
   (assert (= pacer (select CAmkESPortComponent pacer_tick)))
   (assert (= pacer (select CAmkESPortComponent pacer_tock)))
 (declare-const CAmkESPortComponent_size Int)
-(assert (= 35 CAmkESPortComponent_size))
+(assert (= 39 CAmkESPortComponent_size))
 
 (define-fun CAmkESConnectionFlowTos ((_conn CAmkESConnection) (_p1 CAmkESPort) (_p2 CAmkESPort)) Bool
   (or
     (and (= _conn conn1) (= _p1 vmsrc_process_fs) (= _p2 fserv_fs_ctrl))
     (and (= _conn conn2) (= _p1 vmsrc_process_notification_ready_connector) (= _p2 vmsrc_process_notification_ready))
     (and (= _conn conn3) (= _p1 vmsrc_process_dtb_self) (= _p2 vmsrc_process_dtb))
-    (and (= _conn conn4) (= _p1 vmdst_process_fs) (= _p2 fserv_fs_ctrl))
-    (and (= _conn conn5) (= _p1 vmdst_process_notification_ready_connector) (= _p2 vmdst_process_notification_ready))
-    (and (= _conn conn6) (= _p1 vmdst_process_dtb_self) (= _p2 vmdst_process_dtb))
-    (and (= _conn conn7) (= _p1 vmsrc_process_sb_write_port) (= _p2 vmdst_process_sb_read_port))
-    (and (= _conn conn8) (= _p1 pacer_tick) (= _p2 pacer_tock))
-    (and (= _conn conn9) (= _p1 pacer_period_to_vmsrc_process_notification) (= _p2 vmsrc_process_sb_pacer_period_notification))
-    (and (= _conn conn10) (= _p1 pacer_period_to_vmsrc_process_queue) (= _p2 vmsrc_process_sb_pacer_period_queue))
-    (and (= _conn conn11) (= _p1 pacer_period_to_vmdst_process_notification) (= _p2 vmdst_process_sb_pacer_period_notification))
-    (and (= _conn conn12) (= _p1 pacer_period_to_vmdst_process_queue) (= _p2 vmdst_process_sb_pacer_period_queue))
+    (and (= _conn conn4) (= _p1 serial_timeout) (= _p2 time_server_the_timer))
+    (and (= _conn conn5) (= _p1 vmsrc_process_batch) (= _p2 serial_processed_batch))
+    (and (= _conn conn6) (= _p1 vmsrc_process_serial_getchar) (= _p2 serial_getchar))
+    (and (= _conn conn7) (= _p1 vmdst_process_fs) (= _p2 fserv_fs_ctrl))
+    (and (= _conn conn8) (= _p1 vmdst_process_notification_ready_connector) (= _p2 vmdst_process_notification_ready))
+    (and (= _conn conn9) (= _p1 vmdst_process_dtb_self) (= _p2 vmdst_process_dtb))
+    (and (= _conn conn10) (= _p1 vmdst_process_batch) (= _p2 serial_processed_batch))
+    (and (= _conn conn11) (= _p1 vmdst_process_serial_getchar) (= _p2 serial_getchar))
+    (and (= _conn conn12) (= _p1 vmsrc_process_sb_write_port) (= _p2 vmdst_process_sb_read_port))
+    (and (= _conn conn13) (= _p1 pacer_tick) (= _p2 pacer_tock))
+    (and (= _conn conn14) (= _p1 pacer_period_to_vmsrc_process_notification) (= _p2 vmsrc_process_sb_pacer_period_notification))
+    (and (= _conn conn15) (= _p1 pacer_period_to_vmsrc_process_queue) (= _p2 vmsrc_process_sb_pacer_period_queue))
+    (and (= _conn conn16) (= _p1 pacer_period_to_vmdst_process_notification) (= _p2 vmdst_process_sb_pacer_period_notification))
+    (and (= _conn conn17) (= _p1 pacer_period_to_vmdst_process_queue) (= _p2 vmdst_process_sb_pacer_period_queue))
     false))
 (declare-const CAmkESConnectionFlowTos_count Int)
-(assert (= 12 CAmkESConnectionFlowTos_count))
+(assert (= 17 CAmkESConnectionFlowTos_count))
 
 (define-fun ComponentRefinement ((ac (Option AadlComponent)) (cc CAmkESComponent)) Bool
   (or

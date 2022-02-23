@@ -252,7 +252,6 @@ foreach(item IN ITEMS vmsrc_process vmdst_process)
     )
 endforeach()
 
-
 # Overwrite inittab file for using the virtio console hvc0.
 AddFileToOverlayDir(
     "inittab"
@@ -272,7 +271,7 @@ AddOverlayDirToRootfs(
     GZIP
 )
 
-AddToFileServer("linux-initrd-vm-client"
+AddToFileServer("linux-initrd"
                 ${output_overlayed_rootfs_location}
                 DEPENDS rootfs_target)
 

@@ -13,7 +13,7 @@ set(LibUSB OFF CACHE BOOL "" FORCE)
 set(VmInitRdFile ON CACHE BOOL "" FORCE)
 
 # Enable virtio console vmm module
- set(VmVirtioConsole ON CACHE BOOL "" FORCE)
+set(VmVirtioConsole ON CACHE BOOL "" FORCE)
 
 # Make VTimers see absolute time rather than virtual time.
 set(KernelArmVtimerUpdateVOffset OFF CACHE BOOL "" FORCE)
@@ -52,7 +52,7 @@ set(LibUSB OFF CACHE BOOL "" FORCE)
 set(VmInitRdFile ON CACHE BOOL "" FORCE)
 
 # Enable virtio console vmm module
-# set(VmVirtioConsole ON CACHE BOOL "" FORCE)
+set(VmVirtioConsole ON CACHE BOOL "" FORCE)
 
 # Make VTimers see absolute time rather than virtual time.
 set(KernelArmVtimerUpdateVOffset OFF CACHE BOOL "" FORCE)

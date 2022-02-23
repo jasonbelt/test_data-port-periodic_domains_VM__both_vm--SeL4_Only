@@ -44,25 +44,24 @@ assembly {
       "initrd_max_size" : VAR_STRINGIZE(VM_INITRD_MAX_SIZE),
       "initrd_addr" : VAR_STRINGIZE(VM0_INITRD_ADDR)
     };
+
     vmsrc_process.linux_image_config = {
       "linux_bootcmdline" : "console=hvc0 nosmp rw debug loglevel=8 pci=nomsi,realloc=off,bios initcall_blacklist=clk_disable_unused",
       "linux_stdout" : "hvc0",
       "dtb_name": "",
-      "initrd_name" : "linux-initrd-vm-client"
+      "initrd_name" : "linux-initrd"
     };
 
-    //vmsrc_process.dtb = dtb([{"path": "/pl011@9000000"}]);
-    vmsrc_process.dtb = dtb([
-       {"path": "/pcie@10000000"}
-    ]);
-    vmsrc_process.irqs = [];
+    vmsrc_process.dtb = dtb([{}]);
+
+    vmsrc_process.irq = [];
 
     vmsrc_process.mmios = [
-      "0x8040000:0x1000:12", // Interrupt Controller Virtual CPU interface (Virtual Machine view)
+      VM0_MMIOS_ICI, // Interrupt Controller Virtual CPU interface (Virtual Machine view)
     ];
 
     vmsrc_process.untyped_mmios = [
-      "0x40000000:27", // Linux kernel memory regions
+      VM0_MMIOS_LKMR, // Linux kernel memory regions
     ];
 
 
@@ -75,22 +74,24 @@ assembly {
       "initrd_max_size" : VAR_STRINGIZE(VM_INITRD_MAX_SIZE),
       "initrd_addr" : VAR_STRINGIZE(VM1_INITRD_ADDR)
     };
+
     vmdst_process.linux_image_config = {
       "linux_bootcmdline" : "console=hvc0 nosmp rw debug loglevel=8 pci=nomsi,realloc=off,bios initcall_blacklist=clk_disable_unused",
       "linux_stdout" : "hvc0",
-      "dtb-name" : "",
-      "initrd_name" : "linux-initrd-vm-client"
+      "dtb_name": "",
+      "initrd_name" : "linux-initrd"
     };
 
-    vmdst_process.irqs = [];
     vmdst_process.dtb = dtb([{}]);
 
+    vmdst_process.irq = [];
+
     vmdst_process.mmios = [
-      "0x8040000:0x1000:12", // Interrupt Controller Virtual CPU interface (Virtual Machine view)
+      VM1_MMIOS_ICI, // Interrupt Controller Virtual CPU interface (Virtual Machine view)
     ];
 
     vmdst_process.untyped_mmios = [
-      "0x48000000:27", // Linux kernel memory regions
+      VM1_MMIOS_LKMR, // Linux kernel memory regions
     ];
 
   }
